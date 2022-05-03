@@ -1,0 +1,6 @@
+{
+    "name": "package-2",
+    "dependencies": {
+        "package-1": "0.0.0"
+    }
+}
