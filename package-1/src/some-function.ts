@@ -1,3 +1,3 @@
-export function someFunction() {
-    console.log('someFunction');
+export function someFunction(param: string) {
+    console.log('someFunction' + param);
 }
