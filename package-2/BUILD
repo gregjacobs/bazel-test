@@ -11,7 +11,7 @@ ts_project(
     deps = [
         "//package-1:library"
     ],
-    supports_workers = True
+    # supports_workers = True
 )
 
 ts_config(

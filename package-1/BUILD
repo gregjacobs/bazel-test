@@ -19,7 +19,7 @@ ts_project(
     srcs = glob(["src/**/*.ts"]),
     source_map = True,
     declaration = True,
-    supports_workers = True
+    #supports_workers = True
 )
 
 ts_config(

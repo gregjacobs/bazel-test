@@ -1,3 +1,3 @@
 export function someFunction(param: string) {
-    console.log('someFunction' + param);
+    console.log('someFunction' + param + "!");
 }
