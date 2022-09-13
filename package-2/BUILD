@@ -8,9 +8,6 @@ ts_project(
     declaration = True,
     root_dir = "src",
     out_dir = "dist",
-    deps = [
-        "//package-1:library"
-    ],
     # supports_workers = True
 )
 

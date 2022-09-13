@@ -10,9 +10,17 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "lodash": "4.17.21",
+    "react": "^18.0.0",
+    "winston": "*"
+  },
   "devDependencies": {
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "^5.4.0",
+    "@types/lodash": "4.14.182",
+    "@types/react": "^18.0.0",
+    "@types/winston": "*",
     "typescript": "^4.6.2"
   }
 }

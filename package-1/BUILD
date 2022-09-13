@@ -17,8 +17,13 @@ ts_project(
     visibility = ["//visibility:public"],
     tsconfig = ":tsconfig",
     srcs = glob(["src/**/*.ts"]),
+    deps = [
+        "@npm//@types/lodash",
+        "@npm//lodash",
+    ],
     source_map = True,
     declaration = True,
+    validate = False,
     #supports_workers = True
 )
 

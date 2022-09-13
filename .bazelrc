@@ -1,6 +1,11 @@
 # Log the remote execution calls
 build --experimental_remote_grpc_log=grpc_log
 
+build --generate_json_trace_profile=true
+build --profile=profile
+
+build --verbose_failures
+
 # -----------------
 
 # Depending on how many machines are in the remote execution instance, setting
@@ -53,6 +58,37 @@ build:remote --remote_timeout=3600
 # -----------------
 
 build:remote --remote_executor=grpc://localhost:8980
+#build:remote --remote_executor=grpc://34.86.63.227:8980
 # build:remote --remote_instance_name=
 
-build --config=remote
+# build --config=remote
+
+
+# Enforce stricter environment rules, which eliminates some non-hermetic
+# behavior and therefore improves both the remote cache hit rate and the
+# correctness and repeatability of the build.
+build:buildbuddy --incompatible_strict_action_env=true
+
+build:buildbuddy --bes_results_url=https://app.buildbuddy.io/invocation/
+build:buildbuddy --bes_backend=grpcs://remote.buildbuddy.io
+build:buildbuddy --remote_timeout=3600
+build:buildbuddy --remote_executor=grpcs://remote.buildbuddy.io
+build:buildbuddy --remote_header=x-buildbuddy-api-key=tlRPBtYy1lqxuzHFhHjG
+
+# build:buildbuddy --host_platform=@buildbuddy_toolchain//:platform
+# build:buildbuddy --platforms=@buildbuddy_toolchain//:platform
+# build:buildbuddy --extra_execution_platforms=@buildbuddy_toolchain//:platform
+
+build:buildbuddy --extra_toolchains=@rbe_default//config:cc-toolchain
+build:buildbuddy --extra_execution_platforms=@rbe_default//config:platform
+build:buildbuddy --host_platform=@rbe_default//config:platform
+build:buildbuddy --platforms=@rbe_default//config:platform
+
+build:buildbuddy --remote_download_minimal
+build:buildbuddy --experimental_remote_cache_compression 
+
+
+build:buildbuddy --define=EXECUTOR=remote
+
+build:buildbuddy --jobs=50
+build:buildbuddy --remote_timeout=600
