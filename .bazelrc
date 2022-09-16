@@ -6,6 +6,10 @@ build --profile=profile
 
 build --verbose_failures
 
+
+# TEMPORARY
+#build --strategy_regexp=.=local
+
 # -----------------
 
 # Depending on how many machines are in the remote execution instance, setting
