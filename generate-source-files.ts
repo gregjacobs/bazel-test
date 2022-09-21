@@ -1,16 +1,76 @@
 import dedent from 'dedent';
 import fse from 'fs-extra';
 
+// Generate 10 packages that run sequentially (each relies on the previous)
+for (let i = 1; i <= 10; i++) {
+    const packageName = `package-with-dep-${i}`;
+    const packageFolder = `packages/${packageName}`;
+
+    // BUILD, package.json, tsconfig.json
+    const extraDeps = (i === 1) ? '' : `deps = ['//packages/package-with-dep-${i - 1}:library']`
+    generateSupportFiles(packageName, extraDeps);
+
+    // Output a source file with a change
+    fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
+        import { doThing0 } from './functions';
+        ${i === 1 
+            ? '' 
+            : `export * from 'package-with-dep-${i - 1}';`
+        }
+
+        console.log('update #${Date.now()}');
+        console.log(doThing0);
+
+        export function myFn${i}() {
+            console.log('myFn${i}');
+        }
+    `);
+
+    // Output a source file with long file contents
+    fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateLongSourceFile(i));
+}
+
+
+// Generate 100 packages that run in parallel
 for (let i = 1; i <= 100; i++) {
-    const packageFolder = `packages/package-${i}`;
+    const packageName = `package-${i}`;
+    const packageFolder = `packages/${packageName}`;
     // fse.removeSync(packageFolder);
+
+    // BUILD, package.json, tsconfig.json
+    generateSupportFiles(packageName);
+
+    // Output a source file with a change
+    fse.outputFileSync(
+        `${packageFolder}/src/index.ts`,
+        dedent`
+            import { doThing0 } from './functions';
+
+            console.log('update #${Date.now()}');
+            console.log(doThing0);
+
+            export function myFn${i}() {
+                console.log('myFn${i}');
+            }
+        `
+    );
+
+    // Output a source file with long file contents
+    fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateLongSourceFile(i));
+}
+
+
+function generateSupportFiles(packageName: string, tsProjectDeps: string = '') {
+    const packageFolder = `packages/${packageName}`;
 
     // package.json
     fse.outputFileSync(
         `${packageFolder}/package.json`,
         dedent`
             {
-                "name": "package-${i}"
+                "name": "${packageName}",
+                "main": "dist/index.js",
+                "typings": "dist/index.d.ts"
             }
         `
     );
@@ -23,14 +83,16 @@ for (let i = 1; i <= 100; i++) {
 
             ts_project(
                 name = "library",
+                visibility = ['//visibility:public'],
                 tsconfig = ":tsconfig",
                 srcs = glob(["src/**/*.ts"]),
                 source_map = True,
                 declaration = True,
                 root_dir = "src",
-                out_dir = "dist",
+                # out_dir = "dist",
                 # supports_workers = True
-                validate = False
+                validate = False,
+                ${tsProjectDeps}
             )
 
             ts_config(
@@ -53,31 +115,16 @@ for (let i = 1; i <= 100; i++) {
             }
         `
     );
+}
 
-    // Output a source file with a change
-    fse.outputFileSync(
-        `${packageFolder}/src/index.ts`,
-        dedent`
-            import { doThing0 } from './functions';
-            //${i === 1 ? '' : `export * from '@nx-test/lib-with-dep-${i - 1}';`}
-
-            console.log('update #${Date.now()}');
-            console.log(doThing0);
-
-            export function myFn${i}() {
-                console.log('myFn${i}');
-            }
-        `
-    );
-
-    // Output a source file with long file contents
-//     let fileContents = '';
-//     for (let j = 0; j < 100000; j++) {
-//         fileContents += `\
-// export function doThing${j}() {
-//     console.log('Hi ${i} ${j}');
-// }
-// `;
-//     }
-//     fse.outputFileSync(`${packageFolder}/src/functions.ts`, fileContents);
+function generateLongSourceFile(packageNum: number) {
+    let fileContents = '';
+    for (let j = 0; j < 100000; j++) {
+        fileContents += `\
+export function doThing${j}() {
+    console.log('Hi ${packageNum} ${j}');
+}
+`;
+    }
+    return fileContents;
 }

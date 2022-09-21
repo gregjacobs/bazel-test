@@ -1,3 +1,5 @@
 {
-    "name": "package-20"
+    "name": "package-20",
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts"
 }

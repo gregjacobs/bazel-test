@@ -1,5 +1,5 @@
 # Log the remote execution calls
-build --experimental_remote_grpc_log=grpc_log
+# build --experimental_remote_grpc_log=grpc_log
 
 build --generate_json_trace_profile=true
 build --profile=profile
@@ -11,6 +11,11 @@ build --verbose_failures
 #build --strategy_regexp=.=local
 
 # -----------------
+
+build:remote --remote_executor=grpc://localhost:8980
+#build:remote --remote_executor=grpc://34.86.63.227:8980
+# build:remote --remote_instance_name=
+
 
 # Depending on how many machines are in the remote execution instance, setting
 # this higher can make builds faster by allowing more jobs to run in parallel.
@@ -57,16 +62,11 @@ build:remote --remote_timeout=3600
 # account credential instead.
 # build:remote --google_default_credentials=true
 
-
-
 # -----------------
 
-build:remote --remote_executor=grpc://localhost:8980
-#build:remote --remote_executor=grpc://34.86.63.227:8980
-# build:remote --remote_instance_name=
 
-# build --config=remote
-
+build:buildbuddy --jobs=100
+build:buildbuddy --remote_timeout=1500
 
 # Enforce stricter environment rules, which eliminates some non-hermetic
 # behavior and therefore improves both the remote cache hit rate and the
@@ -91,8 +91,5 @@ build:buildbuddy --platforms=@rbe_default//config:platform
 build:buildbuddy --remote_download_minimal
 build:buildbuddy --experimental_remote_cache_compression 
 
-
 build:buildbuddy --define=EXECUTOR=remote
 
-build:buildbuddy --jobs=50
-build:buildbuddy --remote_timeout=600

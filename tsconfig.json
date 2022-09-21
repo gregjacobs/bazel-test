@@ -86,7 +86,7 @@
         // To get IDE support for `import { x } from 'other-package'` within the repo
         "baseUrl": ".",  // must be specified for "paths"
         "paths": {
-            "*": ["./bazel-bin/*"]
+            "*": ["./bazel-bin/*", "./bazel-out/darwin-fastbuild/bin/packages/*"]
         }
     },
     "exclude": ["node_modules", "tmp"]
