@@ -59,6 +59,27 @@ for (let i = 1; i <= 100; i++) {
     fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateLongSourceFile(i));
 }
 
+// Generate a package that consumes all 100 parallel packages
+{
+    const packageName = `package-that-consumes-100`;
+    const packageFolder = `packages/${packageName}`;
+
+    // BUILD, package.json, tsconfig.json
+    const deps: string[] = [];
+    for (let i = 1; i <= 100; i++) {
+        deps.push(`//packages/package-${i}:library`);
+    }
+    const extraDeps = `deps = ['${deps.join(`', '`)}']`;
+    generateSupportFiles(packageName, extraDeps);
+
+    // Output a source file with a change
+    fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
+        import { myFn100 } from 'package-100';
+
+        console.log('update #${Date.now()}');
+        console.log(myFn100);
+    `);
+}
 
 function generateSupportFiles(packageName: string, tsProjectDeps: string = '') {
     const packageFolder = `packages/${packageName}`;
@@ -79,7 +100,7 @@ function generateSupportFiles(packageName: string, tsProjectDeps: string = '') {
     fse.outputFileSync(
         `${packageFolder}/BUILD`,
         dedent`
-            load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+            load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 
             ts_project(
                 name = "library",
@@ -89,7 +110,7 @@ function generateSupportFiles(packageName: string, tsProjectDeps: string = '') {
                 source_map = True,
                 declaration = True,
                 root_dir = "src",
-                # out_dir = "dist",
+                out_dir = "dist",
                 # supports_workers = True
                 validate = False,
                 ${tsProjectDeps}

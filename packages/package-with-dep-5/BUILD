@@ -1,4 +1,4 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 
 ts_project(
     name = "library",
@@ -8,7 +8,7 @@ ts_project(
     source_map = True,
     declaration = True,
     root_dir = "src",
-    # out_dir = "dist",
+    out_dir = "dist",
     # supports_workers = True
     validate = False,
     deps = ['//packages/package-with-dep-4:library']
