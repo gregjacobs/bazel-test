@@ -1,3 +1,5 @@
 .git
 .vscode
 node_modules
+packages/pnpm-package-1/node_modules
+packages/pnpm-package-2/node_modules

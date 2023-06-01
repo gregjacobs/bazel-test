@@ -1,0 +1,3 @@
+packages:
+  - packages/pnpm-package-1
+  - packages/pnpm-package-2

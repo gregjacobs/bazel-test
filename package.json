@@ -20,10 +20,8 @@
   "devDependencies": {
     "@types/dedent": "^0.7.0",
     "@bazel/ibazel": "^0.16.2",
-    "@bazel/typescript": "^5.4.0",
     "@types/lodash": "4.14.182",
     "@types/react": "^18.0.0",
-    "@types/winston": "*",
     "typescript": "4.9.5"
   }
 }

@@ -46,9 +46,9 @@ http_archive(
 
 http_archive(
     name = "aspect_rules_js",
-    sha256 = "3e237129b3554373a80c681c4b47348f91c294ff32d4bc8f8297f40511a4eb6c",
-    strip_prefix = "rules_js-1.25.4",
-    url = "https://github.com/aspect-build/rules_js/releases/download/v1.25.4/rules_js-v1.25.4.tar.gz",
+    sha256 = "0b69e0967f8eb61de60801d6c8654843076bf7ef7512894a692a47f86e84a5c2",
+    strip_prefix = "rules_js-1.27.1",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v1.27.1/rules_js-v1.27.1.tar.gz",
 )
 
 load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
@@ -64,6 +64,12 @@ load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
 npm_translate_lock(
     name = "npm",
     pnpm_lock = "//:pnpm-lock.yaml",
+    data = [
+        "//:package.json",
+        "//:pnpm-workspace.yaml",
+        # "//packages/pnpm-package-1:package.json",
+        # "//packages/pnpm-package-2:package.json",
+    ],
     verify_node_modules_ignored = "//:.bazelignore",
 )
 
