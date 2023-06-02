@@ -1,5 +1,6 @@
 import dedent from 'dedent';
 import fse from 'fs-extra';
+import { range } from 'lodash';
 
 // First clear packages dir
 fse.removeSync('packages');
@@ -15,21 +16,9 @@ for (let packageNum = 0; packageNum < 10; packageNum++) {
     // const extraDeps = (packageNum === 1) ? '' : `deps = ['//packages/package-with-dep-${packageNum - 1}:library']`
     generateSupportFiles({ packageName });
 
-    // Output a source file with a change
-    fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
-        import { doThing0 } from './functions';
-
-        console.log('update #${Date.now()}');
-        console.log(doThing0);
-
-        export function myFn${packageNum}() {
-            console.log('myFn${packageNum}');
-        }
-    `);
-
-    // Output a source file with long file contents
-    fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateLongSourceFile(packageNum));
-
+    // Output source and spec files
+    generateSourceFiles({ packageFolder, packageNum });
+    
     packagesDirsCreated.push(packageFolder);
 }
 
@@ -43,137 +32,114 @@ for (let packageLevel = 1; packageLevel < 10; packageLevel++) {
         // Make the package rely on the 10 packages in the previous "level" of
         // 10 packages.
         // Ex: package 32 relies on packages 20-29, as does package 39
-        const firstPartyDeps: string[] = [];
+        const deps: string[] = [];
         const previousLevelStartPackage = (packageLevel - 1) * 10;
         for (let innerPackageNum = 0; innerPackageNum < 10; innerPackageNum++) {
-            firstPartyDeps.push(`package-${previousLevelStartPackage + innerPackageNum}`);
+            deps.push(`package-${previousLevelStartPackage + innerPackageNum}`);
         }
-        generateSupportFiles({ packageName, firstPartyDeps });
+        generateSupportFiles({ packageName, deps });
 
-        // Output a source file with a change
-        fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
-            import { doThing0 } from './functions';
-            ${firstPartyDeps.map(dep => `export * from '${dep}';`).join('\n            ')}
-
-            console.log('update #${Date.now()}');
-            console.log(doThing0);
-
-            export function myFn${packageNum}() {
-                console.log('myFn${packageNum}');
-            }
-        `);
-
-        // Output a source file with long file contents
-        fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateLongSourceFile(packageNum));
+        // Output source and spec files
+        generateSourceFiles({ packageFolder, packageNum, deps });
 
         packagesDirsCreated.push(packageFolder);
     }
 }
 
 // Write .bazelignore
-fse.outputFileSync('.bazelignore', `
-.git
-.vscode
-node_modules
-${packagesDirsCreated.join(`/node_modules\n`)}/node_modules
+fse.outputFileSync('.bazelignore', dedent`
+    .git
+    .vscode
+    node_modules
+    ${packagesDirsCreated.map(dir => `${dir}/node_modules`).join('\n    ')}
 `);
 
 // Write pnpm-workspace.yaml
-fse.outputFileSync('pnpm-workspace.yaml', `
-packages:
-  - ${packagesDirsCreated.join(`\n  - `)}
+fse.outputFileSync('pnpm-workspace.yaml', dedent`
+    packages:
+      ${packagesDirsCreated.map(dir => `- ${dir}`).join(`\n      `)}
 `, 'utf8');
 
+// ----------------------------------------
 
+function generateSourceFiles({ 
+    packageFolder,
+    packageNum,
+    deps = [],
+}: {
+    packageFolder: string;
+    packageNum: number;
+    deps?: string[];
+}) {
+    const numSourceFiles = 100;
+    for (let i = 0; i < numSourceFiles; i++) {
+        fse.outputFileSync(`${packageFolder}/src/function${i}.ts`, generateFunctionSourceFileContents(packageNum, i));
+    }
 
-// // Generate 10 packages that run sequentially (each relies on the previous)
-// for (let i = 1; i <= 10; i++) {
-//     const packageName = `package-with-dep-${i}`;
-//     const packageFolder = `packages/${packageName}`;
+    fse.outputFileSync(`${packageFolder}/src/index.ts`, generateIndexSourceFileContents({ packageNum, numSourceFiles, deps }));
+    fse.outputFileSync(`${packageFolder}/src/index.spec.ts`, generateSpecFileContents({ packageNum }));
+}
 
-//     // BUILD, package.json, tsconfig.json
-//     generateSupportFiles(packageName);
+/**
+ * Generates the contents of a TypeScript source file
+ */
+function generateFunctionSourceFileContents(packageNum: number, fileNum: number) {
+    return dedent`
+        export function doThing${fileNum}() {
+            console.log('Hi ${packageNum} ${fileNum}');
+        }
+    `;
+}
 
-//     // Output a source file with a change
-//     fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
-//         import { doThing0 } from './functions';
-//         ${i === 1 
-//             ? '' 
-//             : `export * from 'package-with-dep-${i - 1}';`
-//         }
+function generateIndexSourceFileContents({
+    packageNum,
+    numSourceFiles,
+    deps = [],
+}: {
+    packageNum: number;
+    numSourceFiles: number;
+    deps: string[];
+}): string {
+    return dedent`
+        // Imports
+        ${range(numSourceFiles).map((_, i) => `import { doThing${i} } from './function${i}';`).join('\n        ')}
 
-//         console.log('update #${Date.now()}');
-//         console.log(doThing0);
+        // Exports
+        ${deps.map(dep => `export * from '${dep}';`).join('\n        ')}
 
-//         export function myFn${i}() {
-//             console.log('myFn${i}');
-//         }
-//     `);
+        console.log(doThing0);
 
-//     // Output a source file with long file contents
-//     fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateLongSourceFile(i));
-// }
+        export function myFn${packageNum}() {
+            return 'myFn${packageNum}';
+        }
+    `;
+}
 
+function generateSpecFileContents({
+    packageNum,
+}: {
+    packageNum: number;
+}): string {
+    return dedent`
+        import { myFn${packageNum} } from './index';
 
-// // Generate 100 packages that run in parallel
-// for (let i = 1; i <= 100; i++) {
-//     const packageName = `package-${i}`;
-//     const packageFolder = `packages/${packageName}`;
-//     // fse.removeSync(packageFolder);
-
-//     // BUILD, package.json, tsconfig.json
-//     generateSupportFiles(packageName);
-
-//     // Output a source file with a change
-//     fse.outputFileSync(
-//         `${packageFolder}/src/index.ts`,
-//         dedent`
-//             import { doThing0 } from './functions';
-
-//             console.log('update #${Date.now()}');
-//             console.log(doThing0);
-
-//             export function myFn${i}() {
-//                 console.log('myFn${i}');
-//             }
-//         `
-//     );
-
-//     // Output a source file with long file contents
-//     fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateLongSourceFile(i));
-// }
-
-// // Generate a package that consumes all 100 parallel packages
-// {
-//     const packageName = `package-that-consumes-100`;
-//     const packageFolder = `packages/${packageName}`;
-
-//     // BUILD, package.json, tsconfig.json
-//     const deps: string[] = [];
-//     for (let i = 1; i <= 100; i++) {
-//         deps.push(`//packages/package-${i}:library`);
-//     }
-//     const extraDeps = `deps = ['${deps.join(`', '`)}']`;
-//     generateSupportFiles(packageName, extraDeps);
-
-//     // Output a source file with a change
-//     fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
-//         import { myFn100 } from 'package-100';
-
-//         console.log('update #${Date.now()}');
-//         console.log(myFn100);
-//     `);
-// }
+        describe('test', () => {
+            it('should return the correct value', () => {
+                expect(myFn${packageNum}()).toBe('myFn${packageNum}');
+            });
+        });
+    `
+}
 
 /**
  * Generates package.json, BUILD, and tsconfig.json files
  */
 function generateSupportFiles({ 
     packageName, 
-    firstPartyDeps = [],
+    deps = [],
 }: {
     packageName: string, 
-    firstPartyDeps?: string[],  // ex: 'package-1', 'package-2', etc.
+    deps?: string[],  // ex: 'package-1', 'package-2', etc.
 }) {
     const packageFolder = `packages/${packageName}`;
 
@@ -185,10 +151,10 @@ function generateSupportFiles({
                 "name": "${packageName}",
                 "version": "0.0.0",
                 "main": "dist/index.js",
-                "typings": "dist/index.d.ts"${firstPartyDeps.length > 0 ? `,` : ''}
-                ${firstPartyDeps.length > 0 ? `
+                "typings": "dist/index.d.ts"${deps.length > 0 ? `,` : ''}
+                ${deps.length > 0 ? `
                 "dependencies": {
-                    ${firstPartyDeps.map((dep, i) => `"${dep}": "workspace:*"${i < firstPartyDeps.length - 1 ? ',' : ''}`).join('\n                    ')}
+                    ${deps.map((dep, i) => `"${dep}": "workspace:*"${i < deps.length - 1 ? ',' : ''}`).join('\n                    ')}
                 }` : ''}
             }
         `
@@ -198,6 +164,7 @@ function generateSupportFiles({
     fse.outputFileSync(
         `${packageFolder}/BUILD`,
         dedent`
+            load("@aspect_rules_jasmine//jasmine:defs.bzl", "jasmine_test")
             load("@aspect_rules_js//js:defs.bzl", "js_library")
             load("@aspect_rules_js//npm:defs.bzl", "npm_package")
             load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
@@ -231,11 +198,13 @@ function generateSupportFiles({
                 declaration = True,
                 root_dir = "src",
                 out_dir = "dist",
-                # supports_workers = True
-                validate = False,${firstPartyDeps.length > 0 ? `
+                supports_workers = False,
+                validate = False,
                 deps = [
-                    ${firstPartyDeps.map(dep => `':node_modules/${dep}',`).join(`\n                    `)}
-                ]` : ''}
+                    "//:node_modules/@types/jasmine",
+                    "//:node_modules/@types/node",
+                    ${deps.map(dep => `':node_modules/${dep}',`).join(`\n                    `)}
+                ],
             )
             
             ts_config(
@@ -244,6 +213,15 @@ function generateSupportFiles({
                 deps = [
                     "//:tsconfig"
                 ]
+            )
+
+            jasmine_test(
+                name = "test",
+                node_modules = "//:node_modules",
+                data = [
+                    ":library",
+                ],
+                args = ["./**/*.spec.js"],
             )
         `
     );
@@ -254,23 +232,90 @@ function generateSupportFiles({
         dedent`
             {
                 "extends": "../../tsconfig.json",
+                "compilerOptions": {
+                    "types": ["node", "jasmine"]
+                },
                 "include": ["src/**/*.ts"]
             }
         `
     );
 }
 
-/**
- * Generates the contents of a long TypeScript source file
- */
-function generateLongSourceFile(packageNum: number) {
-    let fileContents = '';
-    for (let j = 0; j < 20000; j++) {
-        fileContents += `\
-export function doThing${j}() {
-    console.log('Hi ${packageNum} ${j}');
-}
-`;
-    }
-    return fileContents;
-}
+// // Generate 10 packages that run sequentially (each relies on the previous)
+// for (let i = 1; i <= 10; i++) {
+//     const packageName = `package-with-dep-${i}`;
+//     const packageFolder = `packages/${packageName}`;
+
+//     // BUILD, package.json, tsconfig.json
+//     generateSupportFiles(packageName);
+
+//     // Output a source file with a change
+//     fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
+//         import { doThing0 } from './functions';
+//         ${i === 1 
+//             ? '' 
+//             : `export * from 'package-with-dep-${i - 1}';`
+//         }
+
+//         console.log('update #${Date.now()}');
+//         console.log(doThing0);
+
+//         export function myFn${i}() {
+//             console.log('myFn${i}');
+//         }
+//     `);
+
+//     // Output a source file with long file contents
+//     fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateFunctionSourceFileContents(i));
+// }
+
+
+// // Generate 100 packages that run in parallel
+// for (let i = 1; i <= 100; i++) {
+//     const packageName = `package-${i}`;
+//     const packageFolder = `packages/${packageName}`;
+//     // fse.removeSync(packageFolder);
+
+//     // BUILD, package.json, tsconfig.json
+//     generateSupportFiles(packageName);
+
+//     // Output a source file with a change
+//     fse.outputFileSync(
+//         `${packageFolder}/src/index.ts`,
+//         dedent`
+//             import { doThing0 } from './functions';
+
+//             console.log('update #${Date.now()}');
+//             console.log(doThing0);
+
+//             export function myFn${i}() {
+//                 console.log('myFn${i}');
+//             }
+//         `
+//     );
+
+//     // Output a source file with long file contents
+//     fse.outputFileSync(`${packageFolder}/src/functions.ts`, generateFunctionSourceFileContents(i));
+// }
+
+// // Generate a package that consumes all 100 parallel packages
+// {
+//     const packageName = `package-that-consumes-100`;
+//     const packageFolder = `packages/${packageName}`;
+
+//     // BUILD, package.json, tsconfig.json
+//     const deps: string[] = [];
+//     for (let i = 1; i <= 100; i++) {
+//         deps.push(`//packages/package-${i}:library`);
+//     }
+//     const extraDeps = `deps = ['${deps.join(`', '`)}']`;
+//     generateSupportFiles(packageName, extraDeps);
+
+//     // Output a source file with a change
+//     fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
+//         import { myFn100 } from 'package-100';
+
+//         console.log('update #${Date.now()}');
+//         console.log(myFn100);
+//     `);
+// }

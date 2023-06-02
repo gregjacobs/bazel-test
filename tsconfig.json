@@ -89,5 +89,6 @@
         //     "*": ["./bazel-bin/*", "./bazel-out/darwin-fastbuild/bin/packages/*"]
         // }
     },
+    "include": ["*.ts"],
     "exclude": ["node_modules", "tmp"]
 }

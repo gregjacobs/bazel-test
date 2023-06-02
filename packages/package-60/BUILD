@@ -1,3 +1,4 @@
+load("@aspect_rules_jasmine//jasmine:defs.bzl", "jasmine_test")
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
@@ -31,9 +32,11 @@ ts_project(
     declaration = True,
     root_dir = "src",
     out_dir = "dist",
-    # supports_workers = True
+    supports_workers = False,
     validate = False,
     deps = [
+        "//:node_modules/@types/jasmine",
+        "//:node_modules/@types/node",
         ':node_modules/package-50',
         ':node_modules/package-51',
         ':node_modules/package-52',
@@ -44,7 +47,7 @@ ts_project(
         ':node_modules/package-57',
         ':node_modules/package-58',
         ':node_modules/package-59',
-    ]
+    ],
 )
 
 ts_config(
@@ -53,4 +56,13 @@ ts_config(
     deps = [
         "//:tsconfig"
     ]
+)
+
+jasmine_test(
+    name = "test",
+    node_modules = "//:node_modules",
+    data = [
+        ":library",
+    ],
+    args = ["./**/*.spec.js"],
 )
