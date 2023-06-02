@@ -1,6 +1,6 @@
 # bazel-test
 
-Testing Bazel as a monorepo tool
+Testing Bazel with MS Defender performance issue
 
 ## Steps to Build
 
