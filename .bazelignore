@@ -2,6 +2,7 @@
 .git
 .vscode
 node_modules
+packages/package-0/node_modules
 packages/package-1/node_modules
 packages/package-2/node_modules
 packages/package-3/node_modules
@@ -101,4 +102,3 @@ packages/package-96/node_modules
 packages/package-97/node_modules
 packages/package-98/node_modules
 packages/package-99/node_modules
-packages/package-100/node_modules

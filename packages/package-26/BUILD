@@ -33,7 +33,18 @@ ts_project(
     out_dir = "dist",
     # supports_workers = True
     validate = False,
-    deps = [':node_modules/package-11', ':node_modules/package-12'],
+    deps = [
+        ':node_modules/package-10',
+        ':node_modules/package-11',
+        ':node_modules/package-12',
+        ':node_modules/package-13',
+        ':node_modules/package-14',
+        ':node_modules/package-15',
+        ':node_modules/package-16',
+        ':node_modules/package-17',
+        ':node_modules/package-18',
+        ':node_modules/package-19',
+    ]
 )
 
 ts_config(

@@ -1,5 +1,6 @@
 
 packages:
+  - packages/package-0
   - packages/package-1
   - packages/package-2
   - packages/package-3
@@ -99,4 +100,3 @@ packages:
   - packages/package-97
   - packages/package-98
   - packages/package-99
-  - packages/package-100

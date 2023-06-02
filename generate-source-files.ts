@@ -7,7 +7,7 @@ fse.removeSync('packages');
 const packagesDirsCreated: string[] = [];
 
 // Generate 10 "root" packages
-for (let packageNum = 1; packageNum <= 10; packageNum++) {
+for (let packageNum = 0; packageNum < 10; packageNum++) {
     const packageName = `package-${packageNum}`;
     const packageFolder = `packages/${packageName}`;
 
@@ -35,21 +35,25 @@ for (let packageNum = 1; packageNum <= 10; packageNum++) {
 
 // Create 90 packages, every 10 relies on 2 packages from the previous 10
 for (let packageLevel = 1; packageLevel < 10; packageLevel++) {
-    for (let packageInLevel = 1; packageInLevel <= 10; packageInLevel++) {
+    for (let packageInLevel = 0; packageInLevel < 10; packageInLevel++) {
         const packageNum = packageLevel * 10 + packageInLevel;
         const packageName = `package-${packageNum}`;
         const packageFolder = `packages/${packageName}`;
 
+        // Make the package rely on the 10 packages in the previous "level" of
+        // 10 packages.
+        // Ex: package 32 relies on packages 20-29, as does package 39
+        const firstPartyDeps: string[] = [];
         const previousLevelStartPackage = (packageLevel - 1) * 10;
-        const firstPartyDeps = [
-            `package-${previousLevelStartPackage + 1}`,
-            `package-${previousLevelStartPackage + 2}`,
-        ];
+        for (let innerPackageNum = 0; innerPackageNum < 10; innerPackageNum++) {
+            firstPartyDeps.push(`package-${previousLevelStartPackage + innerPackageNum}`);
+        }
         generateSupportFiles({ packageName, firstPartyDeps });
 
         // Output a source file with a change
         fse.outputFileSync(`${packageFolder}/src/index.ts`, dedent`
             import { doThing0 } from './functions';
+            ${firstPartyDeps.map(dep => `export * from '${dep}';`).join('\n            ')}
 
             console.log('update #${Date.now()}');
             console.log(doThing0);
@@ -228,8 +232,10 @@ function generateSupportFiles({
                 root_dir = "src",
                 out_dir = "dist",
                 # supports_workers = True
-                validate = False,
-                ${firstPartyDeps.length > 0 ? `deps = ['${firstPartyDeps.map(dep => `:node_modules/${dep}`).join(`', '`)}'],` : ''}
+                validate = False,${firstPartyDeps.length > 0 ? `
+                deps = [
+                    ${firstPartyDeps.map(dep => `':node_modules/${dep}',`).join(`\n                    `)}
+                ]` : ''}
             )
             
             ts_config(

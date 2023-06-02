@@ -5,7 +5,15 @@
     "typings": "dist/index.d.ts",
     
     "dependencies": {
+        "package-0": "workspace:*",
         "package-1": "workspace:*",
-        "package-2": "workspace:*"
+        "package-2": "workspace:*",
+        "package-3": "workspace:*",
+        "package-4": "workspace:*",
+        "package-5": "workspace:*",
+        "package-6": "workspace:*",
+        "package-7": "workspace:*",
+        "package-8": "workspace:*",
+        "package-9": "workspace:*"
     }
 }

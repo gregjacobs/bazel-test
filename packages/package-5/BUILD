@@ -33,7 +33,6 @@ ts_project(
     out_dir = "dist",
     # supports_workers = True
     validate = False,
-    
 )
 
 ts_config(
