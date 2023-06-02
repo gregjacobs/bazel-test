@@ -70,24 +70,24 @@
         /* Advanced Options */
         "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
         
-        "rootDirs": [
-            ".",
-            "./bazel-bin",
-            "./bazel-out/host/bin",
-            "./bazel-out/darwin-fastbuild/bin",
-            "./bazel-out/darwin_arm64-fastbuild/bin",
-            "./bazel-out/k8-fastbuild/bin",
-            "./bazel-out/x64_windows-fastbuild/bin",
-            "./bazel-out/darwin-dbg/bin",
-            "./bazel-out/k8-dbg/bin",
-            "./bazel-out/x64_windows-dbg/bin"
-        ],
+        // "rootDirs": [
+        //     ".",
+        //     "./bazel-bin",
+        //     "./bazel-out/host/bin",
+        //     "./bazel-out/darwin-fastbuild/bin",
+        //     "./bazel-out/darwin_arm64-fastbuild/bin",
+        //     "./bazel-out/k8-fastbuild/bin",
+        //     "./bazel-out/x64_windows-fastbuild/bin",
+        //     "./bazel-out/darwin-dbg/bin",
+        //     "./bazel-out/k8-dbg/bin",
+        //     "./bazel-out/x64_windows-dbg/bin"
+        // ],
 
         // To get IDE support for `import { x } from 'other-package'` within the repo
-        "baseUrl": ".",  // must be specified for "paths"
-        "paths": {
-            "*": ["./bazel-bin/*", "./bazel-out/darwin-fastbuild/bin/packages/*"]
-        }
+        // "baseUrl": ".",  // must be specified for "paths"
+        // "paths": {
+        //     "*": ["./bazel-bin/*", "./bazel-out/darwin-fastbuild/bin/packages/*"]
+        // }
     },
     "exclude": ["node_modules", "tmp"]
 }

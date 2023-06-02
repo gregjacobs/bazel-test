@@ -1,9 +1,0 @@
-{
-    "name": "pnpm-package-2",
-    "version": "0.0.0",
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
-    "dependencies": {
-        "pnpm-package-1": "workspace:*"
-    }
-}

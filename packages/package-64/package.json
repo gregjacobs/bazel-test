@@ -1,5 +1,11 @@
 {
     "name": "package-64",
+    "version": "0.0.0",
     "main": "dist/index.js",
-    "typings": "dist/index.d.ts"
+    "typings": "dist/index.d.ts",
+    
+    "dependencies": {
+        "package-51": "workspace:*",
+        "package-52": "workspace:*"
+    }
 }

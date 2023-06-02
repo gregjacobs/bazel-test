@@ -1,5 +1,0 @@
-{
-    "name": "package-with-dep-9",
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts"
-}
