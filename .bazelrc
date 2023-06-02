@@ -93,3 +93,7 @@ build:buildbuddy --experimental_remote_cache_compression
 
 build:buildbuddy --define=EXECUTOR=remote
 
+# ---------------------------------
+
+# Import user-specified options
+try-import %workspace%/.bazelrc-user
