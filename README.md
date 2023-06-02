@@ -11,3 +11,9 @@ Testing Bazel with MS Defender performance issue
    ```
    bazel test //...
    ```
+
+To run the build/tests again, use:
+
+```
+bazel clean --expunge
+```
