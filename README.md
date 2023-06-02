@@ -12,10 +12,8 @@ Testing Bazel with MS Defender performance issue
    bazel test //...
    ```
 
-To run the build/tests again, first use:
+To run the build/tests again starting from scratch, use:
 
 ```
-bazel clean --expunge
+bazel clean --expunge && bazel test //...
 ```
-
-and then run `bazel test //...` again
