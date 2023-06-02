@@ -9,11 +9,12 @@ Testing Bazel with MS Defender performance issue
     * Full instructions if not using bazelisk: https://bazel.build/install/os-x (install Bazel 6.2.1 or higher)
 2. Execute: 
    ```
-   bazel test //...
+   $ bazel test //...
    ```
 
 To run the build/tests again starting from scratch, use:
 
 ```
-bazel clean --expunge && bazel test //...
+$ bazel clean --expunge 
+$ bazel test //...
 ```
